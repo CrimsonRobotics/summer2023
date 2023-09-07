@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
@@ -15,16 +16,11 @@ import frc.robot.Robot;
 import frc.robot.subsystems.SwerveDrive;
 
 public class SwerveTeleOp extends CommandBase {
-
-
-
   private SwerveDrive driveSwerve;
-
-
-
   private Double translationSupply;
   private Double rotationSupply;
   private Double strafeSupply;
+  private BooleanSupplier robotCentricSupply;
 
   private SlewRateLimiter translationLimiter = new SlewRateLimiter(3);
   private SlewRateLimiter rotationLimiter = new SlewRateLimiter(3);
@@ -32,14 +28,12 @@ public class SwerveTeleOp extends CommandBase {
 
   /** Creates a new SwerveTeleOp. */
   public SwerveTeleOp(SwerveDrive driveSwerve, Double translationSupply, Double rotationSupply, Double strafeSupply) {
+    this.driveSwerve = driveSwerve;
     // Use addRequirements() here to declare subsystem dependencies.
-  addRequirements(driveSwerve);
-  this.driveSwerve = driveSwerve;
-  this.translationSupply = translationSupply;
-  this.rotationSupply = rotationSupply;
-  this.strafeSupply = strafeSupply;
-
-  
+    addRequirements(driveSwerve);
+    this.translationSupply = translationSupply;
+    this.rotationSupply = rotationSupply;
+    this.strafeSupply = strafeSupply;
   }
 
   // Called when the command is initially scheduled.
@@ -55,7 +49,7 @@ public class SwerveTeleOp extends CommandBase {
 
     driveSwerve.drive(new Translation2d(translationValue, strafeValue).times(Constants.maxSpeed), 
     rotationValue * Constants.maxAngularVelocity, 
-    true);
+    false);
 
   }
 

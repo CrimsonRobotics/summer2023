@@ -6,12 +6,15 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import frc.SwerveOpt;
 import frc.robot.Constants;
 
 import com.ctre.phoenix.sensors.CANCoder;
@@ -21,7 +24,6 @@ import com.ctre.phoenix.sensors.CANCoder;
 public class SwerveModule {
     public int moduleNumber;
 
-    //set offsets
     private Rotation2d angleOffset;
     private Rotation2d lastAngle;
 
@@ -35,15 +37,19 @@ public class SwerveModule {
     RelativeEncoder angleEncoder;
     CANCoder bestEncoder;
 
-    PIDController speedPID;
-    PIDController anglePID;
+    SparkMaxPIDController speedPID;
+    SparkMaxPIDController anglePID;
 
-    //feedforward loop here
+    //feedforward loop here: will use for auto
 
 
     //Returns the current angle of the wheel
     private Rotation2d getAngle() {
         return Rotation2d.fromDegrees(angleEncoder.getPosition());
+    }
+
+    public double getAngleVoltage() {
+        return angleMotor.getBusVoltage();
     }
 
 
@@ -57,38 +63,65 @@ public class SwerveModule {
     public Rotation2d getCANCoder() {
         return Rotation2d.fromDegrees(bestEncoder.getAbsolutePosition());
     }
-
-
     //Resets the position of the CANCoders to their default state
-    private void resetToAbsolute() {
-        double absolutePosition = getCANCoder().getDegrees() - angleOffset.getDegrees();
-        bestEncoder.setPosition(absolutePosition);
+    public void resetToAbsolute() {
+        System.out.print(getCANCoder().getDegrees());
+        double absolutePosition =  getCANCoder().getDegrees() - angleOffset.getDegrees();
+        angleEncoder.setPosition(absolutePosition);
       }
+
+      //try setting to absolute position?
+
+
+    
       //the skeleton of each individual swerve module
-    public SwerveModule(int moduleNumber, int driveMotorID, int angleMotorID, int CANCoderID, double angleOffset) {
+    public SwerveModule(int moduleNumber, int driveMotorID, int angleMotorID, int CANCoderID, Rotation2d OffsetAngle) {
         this.moduleNumber = moduleNumber;
+        this.angleOffset = OffsetAngle;
 
 
         //Creating the stuff established above and configuring them       
         bestEncoder = new CANCoder(CANCoderID);
 
+        
+        angleMotor = new CANSparkMax(angleMotorID, MotorType.kBrushless);
+        angleEncoder = angleMotor.getEncoder();
+        anglePID = angleMotor.getPIDController();
+        //anglePID = new PIDController(Constants.anglekP, Constants.anglekI, Constants.anglekD);
+        angleMotor.setIdleMode(IdleMode.kBrake);
+        angleMotor.setInverted(false);
+        angleEncoder.setPositionConversionFactor(Constants.angleMotorPosFactor);
+        angleMotor.setSmartCurrentLimit(20);
+        angleMotor.burnFlash();
+        angleMotor.enableVoltageCompensation(12);
+        //anglePID.enableContinuousInput(-180, 180);
+        anglePID.setP(Constants.anglekP);
+        anglePID.setI(Constants.anglekI);
+        anglePID.setD(Constants.anglekD);
+        anglePID.setFF(0);
+        angleEncoder.setPosition(0.0);
+        resetToAbsolute();
+
         speedMotor = new CANSparkMax(driveMotorID, MotorType.kBrushless);
         speedEncoder = speedMotor.getEncoder();
-        speedPID = new PIDController(Constants.speedkP, Constants.speedkI, Constants.speedkD);
+        speedPID = speedMotor.getPIDController();
+        //speedPID = new PIDController(Constants.speedkP, Constants.speedkI, Constants.speedkD);
         speedMotor.setIdleMode(IdleMode.kBrake);
         speedMotor.setInverted(false);
         speedEncoder.setPositionConversionFactor(Constants.speedMotorPosFactor);
         speedEncoder.setVelocityConversionFactor(Constants.speedMotorVelFactor);
         speedEncoder.setPosition(0);
-        speedPID.enableContinuousInput(-180, 180);
+        speedMotor.setSmartCurrentLimit(80);
+        speedMotor.burnFlash();
+        speedMotor.enableVoltageCompensation(12);
+        speedEncoder.setPosition(0.0);
+        speedPID.setP(Constants.speedkP);
+        speedPID.setI(Constants.speedkI);
+        speedPID.setD(Constants.speedkD);
+        speedPID.setFF(0);
 
-        angleMotor = new CANSparkMax(angleMotorID, MotorType.kBrushless);
-        angleEncoder = angleMotor.getEncoder();
-        anglePID = new PIDController(Constants.anglekP, Constants.anglekI, Constants.anglekD);
-        angleMotor.setIdleMode(IdleMode.kBrake);
-        angleMotor.setInverted(false);
-        angleEncoder.setPositionConversionFactor(Constants.angleMotorPosFactor);
-        resetToAbsolute();
+
+        
 
 
         //gets the last known angle of the SwerveModuleState
@@ -96,7 +129,7 @@ public class SwerveModule {
     }
     //calculates the desired position of the swerve wheel
     public void setDesiredState(SwerveModuleState desiredState, boolean isAuto) {
-        desiredState = SwerveModuleState.optimize(desiredState, getState().angle);
+        desiredState = SwerveOpt.optimize(desiredState, getState().angle);
 
         setSpeed(desiredState, isAuto);
         setAngle(desiredState);
@@ -120,8 +153,9 @@ public class SwerveModule {
             ? lastAngle
             : desiredState.angle;
 
-        double angleMotorOutput = anglePID.calculate(lastAngle.getDegrees(), angle.getDegrees());
-        angleMotor.set(angleMotorOutput);
+        anglePID.setReference(angle.getDegrees(), ControlType.kPosition);
+        //double angleMotorValue = anglePID.calculate(lastAngle.getDegrees(), angle.getDegrees());
+        //angleMotor.set(angleMotorValue);
         lastAngle = angle;
     }
 

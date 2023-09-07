@@ -12,8 +12,11 @@ import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.SwerveDrive;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -30,7 +33,10 @@ public class RobotContainer {
   public static Joystick operatorL = new Joystick(2);
   public static Joystick operatorR = new Joystick(3);
 
-  public static SwerveDrive driveSwerve = new SwerveDrive();
+  private SwerveDrive driveSwerve = new SwerveDrive();
+
+  public static JoystickButton resetButton = new JoystickButton(driverL, 12);
+
 
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -40,7 +46,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
-    driveSwerve.setDefaultCommand(new SwerveTeleOp(driveSwerve, driverL.getRawAxis(0), driverR.getRawAxis(1), driverL.getRawAxis(0)));
+    driveSwerve.setDefaultCommand(new SwerveTeleOp(driveSwerve, driverL.getRawAxis(0), driverR.getRawAxis(0), driverL.getRawAxis(1)));
     configureBindings();
   }
 
@@ -57,6 +63,8 @@ public class RobotContainer {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     new Trigger(m_exampleSubsystem::exampleCondition)
         .onTrue(new ExampleCommand(m_exampleSubsystem));
+
+    resetButton.onTrue(new InstantCommand(() -> driveSwerve.resetToAbsolute2()));
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.

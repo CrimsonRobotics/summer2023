@@ -4,8 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.util.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -20,61 +22,57 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
-  public static final double length = 26.5; //PC Specs
-  public static final double width = 26.5; //PC Specs
+  //PC Specs: 26.5 in
 
   //Maybe need maxVolts later?
 
   //PID or feedforward? BOTH!
 
-  public static final int backLeftSpeedMotor = 6; 
-  public static final int backLeftAngleMotor = 5; 
-  public static final int backRightSpeedMotor = 11; 
-  public static final int backRightAngleMotor = 10; 
-  public static final int frontLeftSpeedMotor = 9; 
-  public static final int frontLeftAngleMotor = 8; 
-  public static final int frontRightSpeedMotor = 13; 
-  public static final int frontRightAngleMotor = 12;
+  
 
   //NOTE: RENAME MOD NUMBERS TO POSITION ON BOT!!!!
 
-  //module 1 constants: Front Left
-  public static final int mod1DriveMotor = 9;
-  public static final int mod1AngleMotor = 8;
-  public static final int mod1CANCoder = 2;
-  public static final double mod1AngleOffset = 324.93164;
+  //module 0 constants: Front Left                    //MG    //PC
 
-  //module 2 constants: Front Right
-  public static final int mod2DriveMotor = 13;
-  public static final int mod2AngleMotor = 12;
-  public static final int mod2CANCoder = 3;
-  public static final double mod2AngleOffset = 318.422734375;
+  public static final int mod0DriveMotor = 59;        //59    //10
+  public static final int mod0AngleMotor = 55;        //55    //11
+  public static final int mod0CANCoder = 3;           //3   //2
+  public static final Rotation2d mod0AngleOffset = Rotation2d.fromDegrees(325.01953125);
 
-  //module 3 constants: Back Left
-  public static final int mod3DriveMotor = 6;
-  public static final int mod3AngleMotor = 5;
-  public static final int mod3CANCoder = 1;
-  public static final double mod3AngleOffset = 176.923828125;
+  //module 1 constants: Front Right module 3?
+  public static final int mod1DriveMotor = 58;       //58    //9
+  public static final int mod1AngleMotor = 54;       //54    //8
+  public static final int mod1CANCoder = 0;       //0       //0
+  public static final Rotation2d mod1AngleOffset = Rotation2d.fromDegrees(284.326);
 
-  //module 4 constants: Back Right
-  public static final int mod4DriveMotor = 11;
-  public static final int mod4AngleMotor = 10;
-  public static final int mod4CANCoder = 0;
-  public static final double mod4AngleOffset = 67.939453125;
+
+  //module 2 constants: Back Left
+  public static final int mod2DriveMotor = 53;        //53    //12
+  public static final int mod2AngleMotor = 61;        //61    //13
+  public static final int mod2CANCoder = 2;         //2       //1
+  public static final Rotation2d mod2AngleOffset = Rotation2d.fromDegrees(174.8144);
+
+
+  //module 3 constants: Back Right
+  public static final int mod3DriveMotor = 36;       //36    //9
+  public static final int mod3AngleMotor = 52;       //52    //8
+  public static final int mod3CANCoder = 1;       //1       //3
+  public static final Rotation2d mod3AngleOffset = Rotation2d.fromDegrees(147.04101);
+
 
   //PID Constants
-  public static final double speedkP = 0.05;
+  public static final double speedkP = 0.01;
   public static final double speedkI = 0;
   public static final double speedkD = 0;
 
-  public static final double anglekP = 0.05;
+  public static final double anglekP = 0.01;
   public static final double anglekI = 0;
   public static final double anglekD = 0;
 
 
   //Gear Ratios (for the conversion factors)
   public static final double speedMotorRatio = 6.12;
-  public static final double angleMotorRatio = 6.12;
+  public static final double angleMotorRatio = 150 / 7;
 
   //Conversion Factors
   public static final double speedMotorPosFactor = Math.PI * speedMotorRatio;
@@ -91,15 +89,16 @@ public final class Constants {
 
 
   //Lengths of the drivetrain, as well as the map of where the wheels are on the robot (like coordinates)
-  public static final double robotLength = 26.5;
-  public static final double robotWidth = 26.5;
+  public static final double robotLength = Units.inchesToMeters(23.875);
+  public static final double robotWidth = Units.inchesToMeters(23.875);
 
 
   public static final SwerveDriveKinematics SwerveMap = new SwerveDriveKinematics(
     new Translation2d(robotLength / 2, robotWidth / 2), 
-    new Translation2d(robotLength / 2, -robotWidth / 2),
+    new Translation2d(robotLength / 2, -robotWidth /2),
     new Translation2d(-robotLength / 2, robotWidth / 2),
-    new Translation2d(-robotLength / 2, -robotWidth /2)
+    new Translation2d(-robotLength / 2, -robotWidth / 2)
+
     );
 
 
