@@ -10,30 +10,30 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.SwerveDrive;
 
 public class SwerveTeleOp extends CommandBase {
-  private SwerveDrive driveSwerve;
-  private Double translationSupply;
-  private Double rotationSupply;
-  private Double strafeSupply;
-  private BooleanSupplier robotCentricSupply;
+  private final Joystick driverL;
+  private final Joystick driverR;
 
-  private SlewRateLimiter translationLimiter = new SlewRateLimiter(3);
-  private SlewRateLimiter rotationLimiter = new SlewRateLimiter(3);
-  private SlewRateLimiter strafeLimiter = new SlewRateLimiter(3);
+  private final SwerveDrive driveSwerve;
+  // private final BooleanSupplier robotCentricSupply;
+
+  private final SlewRateLimiter translationLimiter = new SlewRateLimiter(3);
+  private final SlewRateLimiter rotationLimiter = new SlewRateLimiter(3);
+  private final SlewRateLimiter strafeLimiter = new SlewRateLimiter(3);
 
   /** Creates a new SwerveTeleOp. */
-  public SwerveTeleOp(SwerveDrive driveSwerve, Double translationSupply, Double rotationSupply, Double strafeSupply) {
+  public SwerveTeleOp(SwerveDrive driveSwerve, Joystick driverL, Joystick driverR) {
     this.driveSwerve = driveSwerve;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(driveSwerve);
-    this.translationSupply = translationSupply;
-    this.rotationSupply = rotationSupply;
-    this.strafeSupply = strafeSupply;
+    this.driverL = driverL;
+    this.driverR = driverR;
   }
 
   // Called when the command is initially scheduled.
@@ -43,13 +43,16 @@ public class SwerveTeleOp extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double translationValue = translationLimiter.calculate(MathUtil.applyDeadband(Robot.m_robotContainer.driverL.getY(), 0.1));
-    double rotationValue = rotationLimiter.calculate(MathUtil.applyDeadband(Robot.m_robotContainer.driverR.getX(), 0.1));
-    double strafeValue = strafeLimiter.calculate(MathUtil.applyDeadband(Robot.m_robotContainer.driverL.getX(), 0.1));
 
-    driveSwerve.drive(new Translation2d(translationValue, strafeValue).times(Constants.maxSpeed), 
-    rotationValue * Constants.maxAngularVelocity, 
-    false);
+    double translationValue = translationLimiter.calculate(MathUtil.applyDeadband(this.driverL.getRawAxis(1), 0.1));
+    double rotationValue = rotationLimiter.calculate(MathUtil.applyDeadband(this.driverR.getRawAxis(0), 0.1));
+    double strafeValue = strafeLimiter.calculate(MathUtil.applyDeadband(this.driverL.getRawAxis(0), 0.1));
+
+    driveSwerve.drive(
+      new Translation2d(translationValue, strafeValue).times(Constants.maxSpeed), 
+      rotationValue * Constants.maxAngularVelocity, 
+      false
+    );
 
   }
 

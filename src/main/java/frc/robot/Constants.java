@@ -18,9 +18,6 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
-  }
 
   //PC Specs: 26.5 in
 
@@ -35,57 +32,58 @@ public final class Constants {
   //module 0 constants: Front Left                    //MG    //PC
 
   public static final int mod0DriveMotor = 59;        //59    //10
-  public static final int mod0AngleMotor = 55;        //55    //11
+  public static final int mod0TurningMotor = 55;      //55    //11
   public static final int mod0CANCoder = 3;           //3   //2
-  public static final Rotation2d mod0AngleOffset = Rotation2d.fromDegrees(325.01953125);
+  public static final Rotation2d mod0TurningOffset = Rotation2d.fromDegrees(148.2);
 
   //module 1 constants: Front Right module 3?
   public static final int mod1DriveMotor = 58;       //58    //9
-  public static final int mod1AngleMotor = 54;       //54    //8
+  public static final int mod1TurningMotor = 54;       //54    //8
   public static final int mod1CANCoder = 0;       //0       //0
-  public static final Rotation2d mod1AngleOffset = Rotation2d.fromDegrees(284.326);
+  public static final Rotation2d mod1TurningOffset = Rotation2d.fromDegrees(156.0);
 
 
   //module 2 constants: Back Left
   public static final int mod2DriveMotor = 53;        //53    //12
-  public static final int mod2AngleMotor = 61;        //61    //13
+  public static final int mod2TurningMotor = 61;        //61    //13
   public static final int mod2CANCoder = 2;         //2       //1
-  public static final Rotation2d mod2AngleOffset = Rotation2d.fromDegrees(174.8144);
+  public static final Rotation2d mod2TurningOffset = Rotation2d.fromDegrees(166.1);
 
 
   //module 3 constants: Back Right
   public static final int mod3DriveMotor = 36;       //36    //9
-  public static final int mod3AngleMotor = 52;       //52    //8
+  public static final int mod3TurningMotor = 52;       //52    //8
   public static final int mod3CANCoder = 1;       //1       //3
-  public static final Rotation2d mod3AngleOffset = Rotation2d.fromDegrees(147.04101);
+  public static final Rotation2d mod3TurningOffset = Rotation2d.fromDegrees(187.3);
 
 
   //PID Constants
-  public static final double speedkP = 0.01;
-  public static final double speedkI = 0;
-  public static final double speedkD = 0;
+  public static final double drivekP = 0.01; 
+  public static final double drivekI = 0;
+  public static final double drivekD = 0;
 
-  public static final double anglekP = 0.01;
-  public static final double anglekI = 0;
-  public static final double anglekD = 0;
+  public static final double turningkP = 0.0066; //init value 1
+  public static final double turningkI = 0.0006; //init value 0.1
+  public static final double turningkD = 0.0001; //init value 0
 
 
   //Gear Ratios (for the conversion factors)
-  public static final double speedMotorRatio = 6.12;
-  public static final double angleMotorRatio = 150 / 7;
+  public static final double driveMotorRatio = 6.12;
+  public static final double turningMotorRatio = 150 / 7;
 
   //Conversion Factors
-  public static final double speedMotorPosFactor = Math.PI * speedMotorRatio;
-  public static final double speedMotorVelFactor = speedMotorPosFactor / 60;
-  public static final double angleMotorPosFactor = 360 / angleMotorRatio;
-  //NEED ANGLE MOTOR GEAR RATIO
+  public static final double driveMotorPosFactor = Math.PI * driveMotorRatio;
+  public static final double driveMotorVelFactor = driveMotorPosFactor / 60;
+  public static final double turningMotorPosFactor = 360 / turningMotorRatio;
 
   
-  //Max speed of the robot (in meters per second)
+  //Max drive of the robot (in meters per second)
   public static final double maxSpeed = 4.5;
   //are you kidding me??????
   public static final double maxAngularVelocity = 11.5;
   //NEED!!!!!!
+
+  
 
 
   //Lengths of the drivetrain, as well as the map of where the wheels are on the robot (like coordinates)
