@@ -24,7 +24,6 @@ public class Robot extends TimedRobot {
 
   public static RobotContainer m_robotContainer;
 
-  public static Pigeon2 gyro;
   
 
 
@@ -40,9 +39,7 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     ctreConfigs = new CTREConfigs();
     m_robotContainer = new RobotContainer();
-    gyro = new Pigeon2(10);
 
-    Shuffleboard.getTab("Compass").add("title", gyro);
 
   }
 

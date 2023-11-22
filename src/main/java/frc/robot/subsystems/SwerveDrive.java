@@ -29,6 +29,8 @@ public class SwerveDrive extends SubsystemBase {
   private SwerveDriveOdometry odometry;
   private Field2d field;
   private final SwerveModule[] dt;
+  private final Pigeon2 gyro = new Pigeon2(10);
+
   private final Joystick driverL;
   private final Joystick driverR;
 
@@ -36,7 +38,8 @@ public class SwerveDrive extends SubsystemBase {
   public SwerveDrive(Joystick driverL, Joystick driverR) {
     // creates a "map" of the robot, recording the position of each swerve wheel
     // relative to the others
-    Robot.gyro.configFactoryDefault();
+
+    gyro.configFactoryDefault();
     zeroGyro();
     
 
@@ -107,13 +110,13 @@ public class SwerveDrive extends SubsystemBase {
   }
 
   public void zeroGyro() {
-    Robot.gyro.setYaw(0);
+    gyro.setYaw(0);
   }
 
   public Rotation2d getYaw() {
     return (false)
-        ? Rotation2d.fromDegrees(360 - Robot.gyro.getYaw())
-        : Rotation2d.fromDegrees(Robot.gyro.getYaw());
+        ? Rotation2d.fromDegrees(360 - gyro.getYaw())
+        : Rotation2d.fromDegrees(gyro.getYaw());
   }
 
   @Override
