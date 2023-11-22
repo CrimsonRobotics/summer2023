@@ -13,6 +13,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.SwerveOpt;
 import frc.robot.CANSparkMaxUtil;
@@ -124,6 +125,10 @@ public class SwerveModule {
     public SwerveModuleState getState() {
         //return new SwerveModuleState(this.driveEncoder.getVelocity(), getTurningAngle());
         return new SwerveModuleState(this.driveEncoder.getVelocity(), this.getCANCoder());
+    }
+
+    public SwerveModulePosition getPosition() {
+        return new SwerveModulePosition(this.driveEncoder.getPosition(), new Rotation2d(turningEncoder.getPosition()));
     }
     
 

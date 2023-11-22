@@ -80,7 +80,7 @@ public final class Constants {
   //Max drive of the robot (in meters per second)
   public static final double maxSpeed = 4.5;
   //are you kidding me??????
-  public static final double maxAngularVelocity = 11.5;
+  public static final double maxAngularVelocity = 7.5;
   //NEED!!!!!!
 
   

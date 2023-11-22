@@ -4,19 +4,30 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.sensors.Pigeon2;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.RobotContainer;
 
 public class SwerveDrive extends SubsystemBase {
   /** Creates a new SwerveDrive. */
+  private SwerveDriveOdometry odometry;
+  private Field2d field;
   private final SwerveModule[] dt;
   private final Joystick driverL;
   private final Joystick driverR;
@@ -25,6 +36,11 @@ public class SwerveDrive extends SubsystemBase {
   public SwerveDrive(Joystick driverL, Joystick driverR) {
     // creates a "map" of the robot, recording the position of each swerve wheel
     // relative to the others
+    Robot.gyro.configFactoryDefault();
+    zeroGyro();
+    
+
+
     this.dt = new SwerveModule[] {
         new SwerveModule(0, Constants.mod0DriveMotor, Constants.mod0TurningMotor, Constants.mod0CANCoder,
             Constants.mod0TurningOffset),
@@ -35,26 +51,43 @@ public class SwerveDrive extends SubsystemBase {
         new SwerveModule(3, Constants.mod3DriveMotor, Constants.mod3TurningMotor, Constants.mod3CANCoder,
             Constants.mod3TurningOffset)
     };
+    odometry = new SwerveDriveOdometry(Constants.SwerveMap, getYaw(), new SwerveModulePosition[] {dt[0].getPosition(),
+       dt[1].getPosition(), dt[2].getPosition(), dt[3].getPosition()
+    }); 
+
     this.driverL = driverL;
     this.driverR = driverR;
 
     Timer.delay(1);
     resetToAbsolute2();
 
+    field = new Field2d();
+
   }
 
-  public void drive(Translation2d translation, double rotation, boolean isAuto) {
+  public void drive(Translation2d translation, double rotation, boolean isFieldRelative, boolean isAuto) {
     //translation.getAngle()
     SmartDashboard.putNumber("Translation Angle", translation.getAngle().getDegrees());
 
     SwerveModuleState[] swerveModuleStates = Constants.SwerveMap
-        .toSwerveModuleStates(new ChassisSpeeds(translation.getX(), translation.getY(), rotation));
+        .toSwerveModuleStates(isFieldRelative
+        ? ChassisSpeeds.fromFieldRelativeSpeeds(
+          translation.getX(), translation.getY(), rotation, getYaw())
+          : new ChassisSpeeds(translation.getX(), translation.getY(), rotation));
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.maxSpeed);
 
     for (SwerveModule module : this.dt) {
       module.setDesiredState(swerveModuleStates[module.moduleNumber], isAuto);
     }
 
+  }
+
+  public SwerveModuleState[] getStates() {
+    SwerveModuleState[] states = new SwerveModuleState[4];
+    for (SwerveModule mod : dt) {
+      states[mod.moduleNumber] = mod.getState();
+    }
+    return states;
   }
 
   public void resetToAbsolute2() {
@@ -69,9 +102,27 @@ public class SwerveDrive extends SubsystemBase {
     }
   }
 
+  public Pose2d getPose() {
+    return odometry.getPoseMeters();
+  }
+
+  public void zeroGyro() {
+    Robot.gyro.setYaw(0);
+  }
+
+  public Rotation2d getYaw() {
+    return (false)
+        ? Rotation2d.fromDegrees(360 - Robot.gyro.getYaw())
+        : Rotation2d.fromDegrees(Robot.gyro.getYaw());
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    odometry.update(getYaw(), new SwerveModulePosition[] {dt[0].getPosition(),
+      dt[1].getPosition(), dt[2].getPosition(), dt[3].getPosition()
+   });
+    field.setRobotPose(getPose());
     for (SwerveModule module : dt) {
       SmartDashboard.putNumber(
           "Mod " + module.moduleNumber + " Cancoder", module.getCANCoder().getDegrees());
@@ -83,6 +134,11 @@ public class SwerveDrive extends SubsystemBase {
       SmartDashboard.putNumber("Joystick1 Y", this.driverL.getRawAxis(1));
       SmartDashboard.putNumber("Joystick2 X", this.driverR.getRawAxis(0));
       SmartDashboard.putNumber("Joystick2 Y", this.driverR.getRawAxis(1));
+      SmartDashboard.putNumber("Gyro Yaw", getYaw().getDegrees());
+      
+
+
+
       //SmartDashboard.putNumber("Mod" + module.moduleNumber + "turningPosition", module.turningEncoder.getPosition());
       //SmartDashboard.putNumber("Mod 0 CANCoder Absolute", module.bestTurningEncoder.getAbsolutePosition()+ 148.2);
 

@@ -50,7 +50,7 @@ public class SwerveTeleOp extends CommandBase {
 
     driveSwerve.drive(
       new Translation2d(translationValue, strafeValue).times(Constants.maxSpeed), 
-      rotationValue * Constants.maxAngularVelocity, 
+      rotationValue * Constants.maxAngularVelocity, true, 
       false
     );
 
